@@ -81,7 +81,7 @@ weekly:   media + tags + metrics -> benchmarks (incl. sv_per_k =
 
 See `supabase/migrations/0001_phase1_schema.sql` (schema, RLS) and `0002_phase1_taxonomy_seed.sql` (taxonomy rows). Eight tables: `accounts, media, media_metrics_daily, account_metrics_daily, taxonomy, tags, benchmarks, insights, digests`. No `external_media`/`watch_list`/`hypotheses` yet — Phase 2's job.
 
-**Before applying migration 0001 for real:** replace the placeholder emails in its RLS policy (`REPLACE_WITH_FRANCIS_EMAIL`, `REPLACE_WITH_BAILEY_EMAIL`) with actual Supabase auth emails.
+RLS is enabled on every table with **no policy** — default-deny for everyone except the service-role key (which bypasses RLS). Phase 1's jobs all run server-side with that key, so nothing else is needed now. A later migration adds a read policy scoped to Francis's and Bailey's real Supabase auth identities when the Phase 3 dashboard needs it.
 
 ## 7. Acceptance criteria
 

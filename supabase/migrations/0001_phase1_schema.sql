@@ -103,10 +103,12 @@ create table digests (
   sent_at timestamptz
 );
 
--- RLS: enabled everywhere, no public role. Replace the placeholder emails
--- below with Francis's and Bailey's actual Supabase auth emails before
--- applying this migration for real — do not guess or hardcode without
--- confirming with them first.
+-- RLS: enabled on every table with NO policy — that means default-deny for
+-- everyone except the service-role key, which bypasses RLS. Phase 1's jobs
+-- all run server-side with the service-role key, so this is the correct
+-- locked-down posture. When the Phase 3 dashboard needs Francis and Bailey
+-- to read data with their own auth sessions, a later migration adds a
+-- read policy scoped to their real Supabase auth identities.
 do $$
 declare
   t text;
@@ -117,9 +119,5 @@ begin
   ])
   loop
     execute format('alter table %I enable row level security;', t);
-    execute format(
-      'create policy %I on %I for all using (auth.email() in (''REPLACE_WITH_FRANCIS_EMAIL'', ''REPLACE_WITH_BAILEY_EMAIL''));',
-      t || '_owner_access', t
-    );
   end loop;
 end $$;
