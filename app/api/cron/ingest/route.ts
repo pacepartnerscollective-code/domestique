@@ -15,13 +15,15 @@ import {
  * Pulls both accounts; each account's token comes from its own Sensitive
  * env var, looked up via accounts.token_ref, never hardcoded here.
  *
- * Per-media insights are pulled only for media posted within
- * INGEST_SINCE_MONTHS (default 18) — old posts aren't relevant to
- * "what's working now" and pulling insights on hundreds of them hits
- * Meta's rate limits. A small delay between insight calls keeps us under
- * the per-user limit; graphGet's own backoff covers any blips.
+ * Per-media insights are pulled only for media posted on or after
+ * ANALYSIS_SINCE (default 2026-01-01) — the same cutoff the tagging and
+ * insight steps use, so metrics and tags cover the same set of posts.
+ * Older posts aren't relevant to "what's working now" and pulling
+ * insights on hundreds of them hits Meta's rate limits. A small delay
+ * between insight calls keeps us under the per-user limit; graphGet's own
+ * backoff covers any blips.
  */
-const SINCE_MONTHS = Number(process.env.INGEST_SINCE_MONTHS ?? 18);
+const ANALYSIS_SINCE = new Date(process.env.ANALYSIS_SINCE ?? "2026-01-01");
 const INSIGHT_CALL_DELAY_MS = Number(process.env.INGEST_CALL_DELAY_MS ?? 150);
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 export async function GET() {
@@ -75,15 +77,13 @@ async function ingestAccount(supabase: ReturnType<typeof getServiceClient>, acco
 
   let ok = 0, skipped = 0, failed = 0, outOfWindow = 0;
   const today = new Date().toISOString().slice(0, 10);
-  const cutoff = new Date();
-  cutoff.setMonth(cutoff.getMonth() - SINCE_MONTHS);
 
   for (const it of items) {
     if (skip.has(it.id)) {
       skipped++;
       continue;
     }
-    if (new Date(it.timestamp) < cutoff) {
+    if (new Date(it.timestamp) < ANALYSIS_SINCE) {
       outOfWindow++;
       continue;
     }

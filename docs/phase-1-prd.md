@@ -21,6 +21,8 @@ Superseded, not ported: the old `COMPETITORS` env var / basic competitor pull. R
 
 **Not in Phase 1:** Research Service / panels, Ideator, Hook Scorer, dashboard UI, Outreach Engine, hypothesis ledger, anything cross-niche or cross-platform.
 
+**Analysis window:** `ANALYSIS_SINCE` (env var, default `2026-01-01`). Ingestion, tagging, and the insight engine all only touch media posted on or after this date. Media rows for older posts still get stored (full catalogue), but no per-media insight calls, no tags, no inclusion in benchmarks. Francis: unchanged (all his analysable content post-dates his March 2026 business conversion). Bailey: ~65–80 posts vs. ~900 lifetime.
+
 ## 2. Metrics & attribution model — corrected against ground truth
 
 Two different claims, two different methods:
