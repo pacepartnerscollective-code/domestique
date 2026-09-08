@@ -27,9 +27,15 @@ export async function GET() {
       results.push({ account: account.handle, error: `missing env var ${account.token_ref}` });
       continue;
     }
-    results.push(await ingestAccount(supabase, account, token));
+    try {
+      results.push(await ingestAccount(supabase, account, token));
+    } catch (e) {
+      // One account's bad token or API failure must not block the other.
+      results.push({ account: account.handle, error: e instanceof Error ? e.message : String(e) });
+    }
   }
-  return NextResponse.json({ results });
+  const ok = results.every((r) => !("error" in r));
+  return NextResponse.json({ ok, results }, { status: ok ? 200 : 207 });
 }
 
 async function ingestAccount(supabase: ReturnType<typeof getServiceClient>, account: any, token: string) {
