@@ -80,9 +80,9 @@ create table benchmarks (
   metric text not null,
   p50 numeric,
   p90 numeric,
-  window text not null,
+  time_window text not null,
   computed_at timestamptz not null default now(),
-  primary key (scope, metric, window)
+  primary key (scope, metric, time_window)
 );
 
 create table insights (
@@ -91,7 +91,7 @@ create table insights (
   slice text not null,
   effect_size numeric,
   n int not null,
-  window text not null,
+  time_window text not null,
   evidence_media_ids uuid[] not null,
   status text not null check (status in ('confirmed','emerging')),
   created_at timestamptz not null default now()
